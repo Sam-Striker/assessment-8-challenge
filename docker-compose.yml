@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  frontend:
+    image: samuelm/react-fe:latest
+    build: ./react-fe
+    command: npm start
+    container_name: react-fe-container
+    depends_on:
+      - node_api
+    volumes:
+      - './:/frontend'
+    ports:
+      - 3000:3000
+    expose:
+      - '3000:3000'
+    restart: unless-stopped
+  node_api:
+    image: samuelm/node-server:latest
+    build: ./node-server
+    container_name: node-server-container
+    depends_on:
+      - tomcat-api
+    volumes:
+      - ./:/src/node-server
+    ports:
+      - '4000:4000'
+    expose:
+      - '4000:4000'
+    environment:
+      HOST: http://${DOCKER_GATEWAY_HOST:-host.docker.internal}
+    restart: unless-stopped
+  tomcat-api:
+    image: samuelm/tomcat-server:latest
+    build: ./tomcat-server
+    container_name: tomcat-server-container
+    volumes:
+      - ./:/tomcat
+    ports:
+      - '8080:8080'
+    expose:
+      - '8080:8080'
+    restart: unless-stopped
